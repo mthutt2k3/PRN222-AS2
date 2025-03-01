@@ -6,23 +6,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
+using Services;
 
 namespace TranThiMinhThuRazorPages.Pages.Customers
 {
     public class IndexModel : PageModel
     {
-        private readonly BusinessObjects.Ass2SignalRRazorPagesContext _context;
+        private readonly ICustomerService _customerService;
 
-        public IndexModel(BusinessObjects.Ass2SignalRRazorPagesContext context)
+        public IndexModel(ICustomerService customerService)
         {
-            _context = context;
+            _customerService = customerService;
         }
 
-        public IList<Customer> Customer { get;set; } = default!;
+        public IList<Customer> Customer { get; set; } = default!;
 
         public async Task OnGetAsync()
         {
-            Customer = await _context.Customers.ToListAsync();
+            Customer = _customerService.GetAllCustomers();
         }
     }
 }

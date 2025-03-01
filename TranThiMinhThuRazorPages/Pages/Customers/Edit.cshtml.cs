@@ -7,16 +7,17 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
+using Services;
 
 namespace TranThiMinhThuRazorPages.Pages.Customers
 {
     public class EditModel : PageModel
     {
-        private readonly BusinessObjects.Ass2SignalRRazorPagesContext _context;
+        private readonly ICustomerService _customerService;
 
-        public EditModel(BusinessObjects.Ass2SignalRRazorPagesContext context)
+        public EditModel(ICustomerService customerService)
         {
-            _context = context;
+            _customerService = customerService;
         }
 
         [BindProperty]
@@ -29,17 +30,16 @@ namespace TranThiMinhThuRazorPages.Pages.Customers
                 return NotFound();
             }
 
-            var customer =  await _context.Customers.FirstOrDefaultAsync(m => m.CustomerId == id);
+            var customer = _customerService.GetCustomerById(int.Parse(id));
             if (customer == null)
             {
                 return NotFound();
             }
+
             Customer = customer;
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -47,30 +47,23 @@ namespace TranThiMinhThuRazorPages.Pages.Customers
                 return Page();
             }
 
-            _context.Attach(Customer).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                _customerService.UpdateCustomer(Customer);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception)
             {
-                if (!CustomerExists(Customer.CustomerId))
-                {
-                    return NotFound();
-                }
-                else
-                {
+                //if (!_customerService.CustomerExists(Customer.CustomerId))
+                //{
+                //    return NotFound();
+                //}
+                //else
+                //{
                     throw;
-                }
+                //}
             }
 
             return RedirectToPage("./Index");
-        }
-
-        private bool CustomerExists(string id)
-        {
-            return _context.Customers.Any(e => e.CustomerId == id);
         }
     }
 }
